@@ -14,6 +14,7 @@
     </header>
 
     <main>
+
         <form id="search-form">
             <input type="text" id="search-input" placeholder="Search for books..." required>
             <select id="search-type">
@@ -28,17 +29,22 @@
             <button type="button" id="sort-rating">Sort by Rating</button>
         </form>
 
-        <section id="book-list"></section>
+
+        <section id="book-list">
+
+        </section>
+
 
         <div id="selected-book" style="display: none;">
             <h2>Book Details</h2>
             <img class="cover-element" src="" alt="Book Cover">
-            <p class="title-element">Title: <span></span></p>
-            <p class="author-element">Author: <span></span></p>
-            <p class="rating-element">Rating: <span></span></p>
-            <p class="ebook-element">eBook Access: <span></span></p>
-            <p class="published-element">Published: <span></span></p>
-            <p class="isbn-element">ISBN: <span></span></p>
+            <p class="title-element"><strong>Title:</strong> <span></span></p>
+            <p class="author-element"><strong>Author:</strong> <span></span></p>
+            <p class="rating-element"><strong>Rating:</strong> <span></span></p>
+            <p class="ebook-element"><strong>eBook Access:</strong> <span></span></p>
+            <p class="published-element"><strong>Published:</strong> <span></span></p>
+            <p class="isbn-element"><strong>ISBN:</strong> <span></span></p>
+            <button type="button" onclick="goBack()">Back to List</button>
         </div>
     </main>
 

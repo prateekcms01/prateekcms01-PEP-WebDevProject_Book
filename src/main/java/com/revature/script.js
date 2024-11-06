@@ -1,5 +1,10 @@
 // add variable references and event listeners here!
 
+document.getElementById("search-form").addEventListener("submit", handleSearch);
+document.getElementById("search-button").addEventListener("click", handleSearch);
+document.getElementById("ebook-filter").addEventListener("change", handleFilter);
+document.getElementById("sort-rating").addEventListener("click", handleSort);
+
 /**
  * Searches for books using the Google Books API based on the given query and type.
  *
@@ -29,31 +34,31 @@
 async function searchBooks(query, type) {
     const baseUrl = "https://www.googleapis.com/books/v1/volumes";
     let searchQuery = `${type}:${query}`;
-  
+
     try {
-      const response = await fetch(`${baseUrl}?q=${searchQuery}&maxResults=10`);
-      if (!response.ok) throw new Error("Network response was not ok");
-  
-      const data = await response.json();
-      return data.items.map(item => {
-        const info = item.volumeInfo;
-        const access = item.accessInfo;
-        return {
-          title: info.title || "No title",
-          author_name: info.authors ? info.authors.join(", ") : "Unknown",
-          isbn: info.industryIdentifiers?.find(id => id.type === "ISBN_13")?.identifier || "No ISBN",
-          cover_i: info.imageLinks?.thumbnail || "",
-          ebook_access: access.accessViewStatus || "UNKNOWN",
-          first_publish_year: info.publishedDate?.split("-")[0] || "N/A",
-          ratings_sortable: info.averageRating || 0
-        };
-      });
+        const response = await fetch(`${baseUrl}?q=${searchQuery}&maxResults=10`);
+        if (!response.ok) throw new Error("Network response was not ok");
+
+        const data = await response.json();
+        return data.items.map(item => {
+            const info = item.volumeInfo;
+            const access = item.accessInfo;
+            return {
+                title: info.title || "No title",
+                author_name: info.authors ? info.authors.join(", ") : "Unknown",
+                isbn: info.industryIdentifiers?.find(id => id.type === "ISBN_13")?.identifier || "No ISBN",
+                cover_i: info.imageLinks?.thumbnail || "",
+                ebook_access: access.accessViewStatus || "UNKNOWN",
+                first_publish_year: info.publishedDate?.split("-")[0] || "N/A",
+                ratings_sortable: info.averageRating || 0
+            };
+        });
     } catch (error) {
-      console.error("Error fetching books:", error);
-      return [];
+        console.error("Error fetching books:", error);
+        return [];
     }
-  }
-  
+}
+
 
 /**
 * Takes in a list of books and updates the UI accordingly.
@@ -79,28 +84,27 @@ async function searchBooks(query, type) {
 * 5. Ensures that the 'selected-book' element is not visible.
 */
 function displayBookList(books) {
-  const bookList = document.getElementById("book-list");
-  bookList.innerHTML = ""; 
+    const bookList = document.getElementById("book-list");
+    bookList.innerHTML = "";
 
-  if (!books || books.length === 0) {
-      bookList.innerHTML = "<li>No records found.</li>"; 
-      return; 
-  }
+    if (!books || books.length === 0) {
+        bookList.innerHTML = "<li>No records found.</li>";
+        return;
+    }
 
- 
-  books.forEach(book => {
-      const li = document.createElement("li");
-
-      li.innerHTML = `
-          <div class="title-element"><strong>Title:</strong> ${book.title}</div>
-          <div class="author-element"><strong>Author:</strong> ${book.author_name}</div>
-          <div class="rating-element"><strong>Rating:</strong> ${book.ratings_sortable}</div>
-          <div class="cover-element"><img src="${book.cover_i}" alt="${book.title} cover"></div>
-      `;
-
-      li.addEventListener("click", () => displaySingleBook(book));
-      bookList.appendChild(li);
-  });
+    books.forEach(book => {
+        const li = document.createElement("li");
+        li.classList.add("book-item");
+        li.innerHTML = `
+            <div class="title-element"><strong>Title:</strong> ${book.title}</div>
+            <div class="author-element"><strong>Author:</strong> ${book.author_name}</div>
+            <div class="rating-element"><strong>Rating:</strong> ${book.ratings_sortable}</div>
+            <div class="cover-element"><img src="${book.cover_i}" alt="${book.title} cover"></div>
+            <div class="ebook-element">${book.ebook_access}</div>
+        `;
+        li.addEventListener("click", () => displaySingleBook(book));
+        bookList.appendChild(li);
+    });
 }
 
 
@@ -123,18 +127,14 @@ function displayBookList(books) {
  * 7. Handles any errors that may occur during the search process.
  */
 async function handleSearch(event) {
-    event.preventDefault(); 
-    
+    event.preventDefault();
+
     const query = document.getElementById("search-input").value;
     const type = document.getElementById("search-type").value;
-    
-    
+
     const books = await searchBooks(query, type);
     displayBookList(books);
 }
-
-
-document.getElementById("search-form").addEventListener("submit", handleSearch);
 
 
 
@@ -166,20 +166,21 @@ document.getElementById("search-form").addEventListener("submit", handleSearch);
 function displaySingleBook(book) {
     const selectedBook = document.getElementById("selected-book");
     const bookList = document.getElementById("book-list");
-  
+
     bookList.style.display = "none";
     selectedBook.style.display = "block";
     selectedBook.innerHTML = `
-      <h2>${book.title}</h2>
-      <p><strong>Author:</strong> ${book.author_name}</p>
-      <p><strong>First Published:</strong> ${book.first_publish_year}</p>
-      <p><strong>E-book Access:</strong> ${book.ebook_access}</p>
-      <p><strong>Rating:</strong> ${book.ratings_sortable}</p>
-      <p><strong>ISBN:</strong> ${book.isbn}</p>
-      <img src="${book.cover_i}" alt="${book.title} cover">
+        <h2>${book.title}</h2>
+        <p><strong>Author:</strong> ${book.author_name}</p>
+        <p><strong>First Published:</strong> ${book.first_publish_year}</p>
+        <p><strong>E-book Access:</strong> ${book.ebook_access}</p>
+        <p><strong>Rating:</strong> ${book.ratings_sortable}</p>
+        <p><strong>ISBN:</strong> ${book.isbn}</p>
+        <img src="${book.cover_i}" alt="${book.title} cover">
     `;
-  }
-  
+}
+
+
 
 /**
  * Filters the displayed book list to show only e-books when the checkbox is checked.
@@ -197,22 +198,17 @@ function displaySingleBook(book) {
  * 
  */
 function handleFilter() {
+    const isChecked = document.getElementById("ebook-filter").checked;
+    const bookList = document.getElementById("book-list");
 
-    document.getElementById("ebook-filter").addEventListener("change", event => {
-        const isChecked = event.target.checked;
-        const bookList = document.getElementById("book-list");
-      
-        Array.from(bookList.children).forEach(li => {
-          const ebookAccess = li.querySelector(".ebook-element").textContent;
-          if (isChecked && ebookAccess !== "FULL_PUBLIC_DOMAIN") {
+    Array.from(bookList.children).forEach(li => {
+        const ebookAccess = li.querySelector(".ebook-element").textContent;
+        if (isChecked && ebookAccess !== "FULL_PUBLIC_DOMAIN") {
             li.style.display = "none";
-          } else {
+        } else {
             li.style.display = "block";
-          }
-        });
-      });
-      
-
+        }
+    });
 }
 
 /**
@@ -229,20 +225,16 @@ function handleFilter() {
  * 3. Updates the displayed book list with the sorted results.
  * 
  */
+
 function handleSort() {
+    const bookList = Array.from(document.getElementById("book-list").children);
+    const sortedBooks = bookList.sort((a, b) => {
+        const ratingA = parseFloat(a.querySelector(".rating-element").textContent.split(": ")[1]) || 0;
+        const ratingB = parseFloat(b.querySelector(".rating-element").textContent.split(": ")[1]) || 0;
+        return ratingB - ratingA;
+    });
 
-    document.getElementById("sort-rating").addEventListener("click", () => {
-        const bookList = Array.from(document.getElementById("book-list").children);
-        const sortedBooks = bookList.sort((a, b) => {
-          const ratingA = parseFloat(a.querySelector(".rating-element").textContent) || 0;
-          const ratingB = parseFloat(b.querySelector(".rating-element").textContent) || 0;
-          return ratingB - ratingA;
-        });
-      
-        const listContainer = document.getElementById("book-list");
-        listContainer.innerHTML = "";
-        sortedBooks.forEach(book => listContainer.appendChild(book));
-      });
-      
-
+    const listContainer = document.getElementById("book-list");
+    listContainer.innerHTML = "";
+    sortedBooks.forEach(book => listContainer.appendChild(book));
 }
