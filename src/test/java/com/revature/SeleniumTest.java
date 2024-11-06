@@ -61,44 +61,44 @@ public class SeleniumTest {
         JavascriptExecutor jsExecutor = (JavascriptExecutor) webDriver;
         wait.until(
                 driver -> ((JavascriptExecutor) driver).executeScript("return document.readyState").equals("complete"));
-    
+
         // Test success with Google Books API query #1
         String script = "return searchBooks(arguments[0], arguments[1]).then(JSON.stringify);";
         String actual1 = (String) jsExecutor.executeScript(script, "harry potter", "title");
-    
+
         if (actual1 == null) {
             fail("No results provided by the searchBooks function.");
         }
-    
+
         // Log the actual response for debugging purposes
         System.out.println("Actual response 1: " + actual1.toLowerCase());
-    
+
         // Extract key fields to validate rather than using a direct string match
         Assertions.assertTrue(actual1.contains("Harry Potter"), "Title 'Harry Potter' not found.");
         System.out.println(actual1);
         Assertions.assertTrue(actual1.contains("J. K. Rowling"), "Author 'J.K. Rowling' not found.");
-    
+
         // Test success with query #2
         String actual2 = (String) jsExecutor.executeScript(script, "poe", "author");
         System.out.println("Actual response 2: " + actual2.toLowerCase());
-    
+
         // Validate key fields instead of full string
         Assertions.assertTrue(actual2.contains("Edgar Allan Poe"), "Author 'Edgar Allan Poe' not found.");
         Assertions.assertTrue(actual2.contains("The Tell-Tale Heart"), "Title 'The Tell-Tale Heart' not found.");
-    
+
         // Test success with query #3
         String actual3 = (String) jsExecutor.executeScript(script, "9781472539342", "isbn");
         System.out.println("Actual response 3: " + actual3.toLowerCase());
-    
+
         // Validate key fields instead of full string
         Assertions.assertTrue(actual3.contains("The Road"), "Title 'The Road' not found.");
         Assertions.assertTrue(actual3.contains("Cormac McCarthy"), "Author 'Cormac McCarthy' not found.");
-    
+
         // Assert only 10 books or less are returned from the function
-        Object actual4 = jsExecutor.executeScript("return searchBooks(arguments[0], arguments[1]);", "9781725757264", "isbn");
+        Object actual4 = jsExecutor.executeScript("return searchBooks(arguments[0], arguments[1]);", "9781725757264",
+                "isbn");
         Assertions.assertTrue(((List) actual4).size() <= 10, "The list of books returned is over 10 elements in size.");
     }
-    
 
     // #2: Our application should be able to display book search results.
     @Test
@@ -262,11 +262,11 @@ public class SeleniumTest {
         assertFalse(books.isEmpty(), "No books displayed.");
 
         for (int i = 0; i < books.size() - 1; i++) {
-            
+
             String ratingTextA = books.get(i).findElement(By.className("rating-element")).getText().split(": ")[1];
             float ratingA = ratingTextA.equals("Unknown") ? 0.0f : Float.parseFloat(ratingTextA);
             System.out.println("Rating A is: " + ratingA);
-    
+
             String ratingTextB = books.get(i + 1).findElement(By.className("rating-element")).getText().split(": ")[1];
             float ratingB = ratingTextB.equals("Unknown") ? 0.0f : Float.parseFloat(ratingTextB);
             System.out.println("Rating B is: " + ratingB);
@@ -329,8 +329,10 @@ public class SeleniumTest {
             if (book.isDisplayed() && !ebookValue.equalsIgnoreCase("eBook Access: Available")) {
                 fail("A book's ebook value is not 'borrowable'");
             }
-        };
+        }
+        ;
     }
+
     // Semantic elements should be included in HTML for web accessibility.
     @Test
     public void testSemanticHtmlElements() {
@@ -367,7 +369,6 @@ public class SeleniumTest {
     }
 }
 
-
 class TestingUtils {
 
     public static String getContent(String filename) {
@@ -380,7 +381,3 @@ class TestingUtils {
         return content;
     }
 }
-
-
-    
-    
